@@ -127,4 +127,4 @@ ENTRYPOINT ["/entrypoint.sh"]
 
 WORKDIR /usr/local/lsws
 
-CMD ["/usr/local/lsws/bin/openlitespeed","-n"]
+CMD ["/usr/local/lsws/bin/lswsctrl","start"]
