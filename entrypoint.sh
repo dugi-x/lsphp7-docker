@@ -11,7 +11,7 @@ if [ -f "/usr/local/lsws/lsphp${_LSPHP}/bin/php" ]; then
 fi
 
 
-$@
+"$@"
 
 trap "exit" INT
 while true; do
