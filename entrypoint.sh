@@ -10,6 +10,12 @@ if [ -f "/usr/local/lsws/lsphp${_LSPHP}/bin/php" ]; then
     echo "php-cli switch to version: ${_LSPHP}"
 fi
 
+echo "$LSADMIN_USERNAME:$(php /usr/local/lsws/admin/misc/htpasswd.php $LSADMIN_PASSWORD)" > /usr/local/lsws/admin/conf/htpasswd
+unset LSADMIN_USERNAME LSADMIN_PASSWORD
+
+if [ "$AUTOCONFIG" -eq 1 ]; then
+    source /autoconfig.sh
+fi 
 
 "$@"
 
@@ -27,3 +33,5 @@ while true; do
 
     sleep 60
 done
+
+

@@ -1,4 +1,4 @@
-FROM dugi/openlitespeed:1.6.5
+FROM dugi/openlitespeed:latest
 
 RUN yum -y install mysql
 
@@ -121,6 +121,11 @@ RUN  chown lsadm:lsadm /usr/local/lsws/conf -R
 EXPOSE 80 443
 
 ENV LSPHP=73
+ENV LSADMIN_USERNAME=admin
+ENV LSADMIN_PASSWORD=123456
+ENV AUTOCONFIG=1
+
+COPY autoconfig.sh /autoconfig.sh
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
