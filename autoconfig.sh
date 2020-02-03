@@ -1,37 +1,42 @@
 #!/bin/bash
 
 chmod 711 /home
-for d in /home/*; do
+for home in /home/*; do
 
-    if [[ -d $d ]]; then
+  if [[ -d $home ]]; then
 
-        _UID=$(stat -c "%u" $d)
-        _GID=$(stat -c "%g" $d)
-        _VHOST=$(basename $d)
-        adduser $_VHOST -u $_UID -M -d $d -N
-        getent group $_GID > /dev/null || groupadd $_VHOST -g $_GID
-        usermod -g $_GID $_VHOST
+    _UID=$(stat -c "%u" $home)
+    _GID=$(stat -c "%g" $home)
 
-        chmod 711 $d
-        mkdir -p $d/public_html
-        chown $_UID:$_GID -R $d/public_html
-        find $d/public_html -type d -exec chmod 755 {} +
-        find $d/public_html -type f -exec chmod 644 {} +
+    getent passwd $_UID >/dev/null || adduser "user$_UID" -u $_UID -M -d $home -N
+    getent group $_GID >/dev/null || groupadd "user$_UID" -g $_GID
 
-        mkdir -p $d/logs
-        chown $_UID:nobody $d/logs
-        chmod -R 750 $d/logs
+    _UNAME=$(stat -c "%U" $home)
+    _GNAME=$(stat -c "%G" $home)
+    usermod -g $_GID $_UNAME >/dev/null
 
-        mkdir -p $d/cert
-        chown $_UID:nobody $d/cert
-        chmod -R 750 $d/cert
+    chmod 711 $home
+    mkdir -p $home/public_html
+    chown $_UID:$_GID -R $home/public_html
+    find $home/public_html -type d -exec chmod 755 {} +
+    find $home/public_html -type f -exec chmod 644 {} +
 
-        #export $(grep -v '^#' "${d}.env" | xargs -0) 
+    mkdir -p $home/logs
+    chown $_UID:nobody $home/logs
+    chmod -R 750 $home/logs
 
-        mkdir -p /usr/local/lsws/conf/vhosts/$_VHOST
-        touch /usr/local/lsws/conf/vhosts/$_VHOST/vhost.conf
-        chmod 600 /usr/local/lsws/conf/vhosts/$_VHOST/vhost.conf
-        echo "
+    mkdir -p $home/cert
+    chown $_UID:nobody $home/cert
+    chmod -R 750 $home/cert
+
+    _VHOST=$(basename $home)
+    #export $(grep -v '^#' "${d}.env" | xargs)
+    #local $(grep -Ex '\w+=\S.*' .initd | xargs)
+
+    mkdir -p /usr/local/lsws/conf/vhosts/$_VHOST
+    touch /usr/local/lsws/conf/vhosts/$_VHOST/vhost.conf
+    chmod 600 /usr/local/lsws/conf/vhosts/$_VHOST/vhost.conf
+    echo "
 docRoot                   \$VH_ROOT/public_html
 vhDomain                  \$VH_NAME
 vhAliases                 www.\$VH_NAME
@@ -74,8 +79,8 @@ extprocessor $_VHOST {
   respBuffer              0
   autoStart               1
   path                    /usr/local/lsws/lsphp$LSPHP/bin/lsphp
-  extUser                 $_VHOST
-  extGroup                $_VHOST
+  extUser                 $_UNAME
+  extGroup                $_UNAME
   memSoftLimit            2047M
   memHardLimit            2047M
   procSoftLimit           400
@@ -96,20 +101,21 @@ vhssl  {
   certFile                \$VH_ROOT/cert/fullchain.pem
   certChain               1
   sslProtocol             30
-}" >> /usr/local/lsws/conf/vhosts/$_VHOST/vhost.conf
+}" >>/usr/local/lsws/conf/vhosts/$_VHOST/vhost.conf
 
-
-        echo "
+    echo "
 virtualHost $_VHOST {
     vhRoot                  /home/\$VH_NAME
     configFile              \$SERVER_ROOT/conf/vhosts/\$VH_NAME/vhost.conf
     allowSymbolLink          1
     enableScript             1
     restrained               1
-}" >> /usr/local/lsws/conf/httpd_config.conf
-        
-        sed -i "s|.*map.*Example.*|  map                     $_VHOST $_VHOST,www.$_VHOST\n  map                     Example *|g" /usr/local/lsws/conf/httpd_config.conf
-    fi
+}" >>/usr/local/lsws/conf/httpd_config.conf
+
+    sed -i "s|.*map.*Example.*|  map                     $_VHOST $_VHOST,www.$_VHOST\n  map                     Example *|g" /usr/local/lsws/conf/httpd_config.conf
+
+  fi
 
 done
+
 chown lsadm:lsadm -R /usr/local/lsws/conf

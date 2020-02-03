@@ -114,6 +114,33 @@ RUN yum -y install lsphp73 \
                    lsphp73-common  \
                    lsphp73-bcmath
 
+RUN yum -y install lsphp74 \
+                   lsphp74-json \
+                   lsphp74-xmlrpc \
+                   lsphp74-xml \
+                   lsphp74-tidy \
+                   lsphp74-soap \
+                   lsphp74-snmp \
+                   #lsphp74-recode \
+                   lsphp74-pspell \
+                   lsphp74-process \
+                   lsphp74-pgsql \
+                   lsphp74-pear \
+                   lsphp74-pdo \
+                   lsphp74-opcache \
+                   lsphp74-odbc \
+                   lsphp74-mysqlnd \
+                   lsphp74-mcrypt \
+                   lsphp74-mbstring \
+                   lsphp74-ldap \
+                   lsphp74-intl \
+                   lsphp74-imap \
+                   lsphp74-gmp \
+                   lsphp74-gd \
+                   lsphp74-enchant \
+                   lsphp74-dba  \
+                   lsphp74-common  \
+                   lsphp74-bcmath
 
 COPY conf/httpd_config.conf /usr/local/lsws/conf/httpd_config.conf
 RUN  chown lsadm:lsadm /usr/local/lsws/conf -R
@@ -123,7 +150,7 @@ EXPOSE 80 443
 ENV LSPHP=73
 ENV LSADMIN_USERNAME=admin
 ENV LSADMIN_PASSWORD=123456
-ENV AUTOCONFIG=1
+ENV AUTOCONFIG=0
 
 COPY autoconfig.sh /autoconfig.sh
 COPY entrypoint.sh /entrypoint.sh
